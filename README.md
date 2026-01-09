@@ -1,7 +1,7 @@
 # Code supporting to replicate the Phylowave analysi of the paper "The spread of sexually transmissible drug-resistant shigellosis"
 
 ## Pre-requisites
-Before starting, make sure you cloned the Phylowave repo: https://github.com/noemielefrancq/Phylowave_Learning-fitness-dynamics-pathogens-in-phylogenies
+Before starting, make sure you cloned the Phylowave repo: https://github.com/noemielefrancq/Phylowave_Learning-fitness-dynamics-pathogens-in-phylogenies, and have installed all the required libraries listed there.
 
 ## Data
 You can find the data used to perform the analysis in the "1_Data" folder.
