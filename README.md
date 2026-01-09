@@ -1,3 +1,6 @@
-# Code supporting the analysis of fitness dynamics of S. Sonnei in the UK
+# Code supporting to replicate the Phylowave analysi of the paper "The spread of sexually transmissible drug-resistant shigellosis"
 
-Proper detailed readme to come
+## Pre-requisites
+Before starting, make sure you cloned the Phylowave repo: https://github.com/noemielefrancq/Phylowave_Learning-fitness-dynamics-pathogens-in-phylogenies
+
+## Data
