@@ -9,12 +9,12 @@ You can find the data used to perform the analysis in the "1_Data" folder.
 ## Run analaysis
 To replicate the analysis, all the R codes are procided in the folder "2_analysis_index". 
 The analysis is organised in 2 steps:
-- *Compute the index dynamics "1_index_computations"*
+- **Compute the index dynamics, folder "1_index_computations"**
 
   The following codes have to be run sequentially:
   - 1.1: 1_1_initial_index_computation_and_parameters.R
   - 1.2: 1_2_plot_initial_index.R
-- *Detect lineages and explore them "2_find_index_groups"*
+- **Detect lineages and explore them, folder "2_find_index_groups"**
 
   The following codes have to be run sequentially:
   - 2.1: 2_1_exploration_lineage_detection_122024.R
