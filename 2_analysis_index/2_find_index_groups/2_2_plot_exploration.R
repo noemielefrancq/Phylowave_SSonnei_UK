@@ -16,7 +16,8 @@ library(ggtree)
 library(extrafont)
 loadfonts(device="all")
 
-load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251007.Rdata')
+setwd('~/Dropbox/Projects/2025_Phylowave_SSonnei/Phylowave_SSonnei/')
+load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251218.Rdata')
 
 ########################################################################################################################################
 ## Useful functions
@@ -199,7 +200,6 @@ read.chains.from.table = function(table){
 setwd('~/Dropbox/Projects/2025_Phylowave_SSonnei/Phylowave_SSonnei/2_analysis_index/2_find_index_groups/')
 #############################################################
 
-
 #############################################################
 ## Load results
 #############################################################
@@ -209,11 +209,8 @@ min_group_size = 30
 potential_splits = readRDS(paste0('potential_splits_weighting_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
 
 min_group_size = 30
-potential_splits_STN = readRDS(paste0('potential_splits_weighting_STN_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
-potential_splits_nonSTN = readRDS(paste0('potential_splits_weighting_nonSTN_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
 potential_splits_pMSM = readRDS(paste0('potential_splits_weighting_pMSM_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
 potential_splits_nonpMSM = readRDS(paste0('potential_splits_weighting_nonpMSM_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
-potential_splits_MSM_pandemic = readRDS(paste0('potential_splits_weighting_MSM_pandemic_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
 #############################################################
 
 #############################################################
@@ -224,16 +221,6 @@ explained_dev = data.frame('N_groups' = 0:length(potential_splits$best_dev_expla
                                      'Non_explained_deviance_log' = log(1-c(potential_splits$first_dev, potential_splits$best_dev_explained)))
 explained_dev$Non_explained_deviance_log = explained_dev$Non_explained_deviance_log-min(explained_dev$Non_explained_deviance_log)
 
-explained_dev_STN = data.frame('N_groups' = 0:length(potential_splits_STN$best_dev_explained),
-                           'Non_explained_deviance' = (1-c(potential_splits_STN$first_dev, potential_splits_STN$best_dev_explained)),
-                           'Non_explained_deviance_log' = log(1-c(potential_splits_STN$first_dev, potential_splits_STN$best_dev_explained)))
-explained_dev_STN$Non_explained_deviance_log = explained_dev_STN$Non_explained_deviance_log-min(explained_dev_STN$Non_explained_deviance_log)
-
-explained_dev_nonSTN = data.frame('N_groups' = 0:length(potential_splits_nonSTN$best_dev_explained),
-                               'Non_explained_deviance' = (1-c(potential_splits_nonSTN$first_dev, potential_splits_nonSTN$best_dev_explained)),
-                               'Non_explained_deviance_log' = log(1-c(potential_splits_nonSTN$first_dev, potential_splits_nonSTN$best_dev_explained)))
-explained_dev_nonSTN$Non_explained_deviance_log = explained_dev_nonSTN$Non_explained_deviance_log-min(explained_dev_nonSTN$Non_explained_deviance_log)
-
 explained_dev_pMSM = data.frame('N_groups' = 0:length(potential_splits_pMSM$best_dev_explained),
                                'Non_explained_deviance' = (1-c(potential_splits_pMSM$first_dev, potential_splits_pMSM$best_dev_explained)),
                                'Non_explained_deviance_log' = log(1-c(potential_splits_pMSM$first_dev, potential_splits_pMSM$best_dev_explained)))
@@ -243,11 +230,6 @@ explained_dev_nonpMSM = data.frame('N_groups' = 0:length(potential_splits_nonpMS
                                   'Non_explained_deviance' = (1-c(potential_splits_nonpMSM$first_dev, potential_splits_nonpMSM$best_dev_explained)),
                                   'Non_explained_deviance_log' = log(1-c(potential_splits_nonpMSM$first_dev, potential_splits_nonpMSM$best_dev_explained)))
 explained_dev_nonpMSM$Non_explained_deviance_log = explained_dev_nonpMSM$Non_explained_deviance_log-min(explained_dev_nonpMSM$Non_explained_deviance_log)
-
-explained_dev_MSM_pandemic = data.frame('N_groups' = 0:length(potential_splits_MSM_pandemic$best_dev_explained),
-                                  'Non_explained_deviance' = (1-c(potential_splits_MSM_pandemic$first_dev, potential_splits_MSM_pandemic$best_dev_explained)),
-                                  'Non_explained_deviance_log' = log(1-c(potential_splits_MSM_pandemic$first_dev, potential_splits_MSM_pandemic$best_dev_explained)))
-explained_dev_MSM_pandemic$Non_explained_deviance_log = explained_dev_MSM_pandemic$Non_explained_deviance_log-min(explained_dev_MSM_pandemic$Non_explained_deviance_log)
 #############################################################
 
 #############################################################
@@ -259,7 +241,7 @@ setwd('~/Dropbox/Projects/2025_Phylowave_SSonnei/Phylowave_SSonnei/2_analysis_in
 #############################################################
 ## Plot
 #############################################################
-pdf('Elbow_plot_explained_deviance_N_groups_SSonnei_20251007.pdf', 
+pdf('Elbow_plot_explained_deviance_N_groups_SSonnei_20251218.pdf', 
     width = 15/2.54, height = 5/2.54, fonts = 'Arial', pointsize = 12)
 par(mfrow = c(1,3), oma = c(0.5,0.25,0.25,0.25), mar = c(1.6,1.6,1.1,0.5), mgp = c(0.7,0,-0.1), family = 'Arial',
         cex.axis=0.5, cex.lab=0.5, cex.main=0.7, cex.sub=0.5)
@@ -298,244 +280,5 @@ axis(2, las = 2, at = seq(0,0.3,0.1),
      labels = seq(0,0.3,0.1), lwd = 0.5, tck=-0.02)
 abline(v = 9, lwd = 2, lty = 2, col = 'chartreuse4')
 dev.off()
-## Chosen iteration
-## 9
-## dev explained = 0.9424715
-#############################################################
-
-
-#############################################################
-## Plot STN
-#############################################################
-pdf('Elbow_plot_explained_deviance_N_groups_SSonnei_STN_20251007.pdf', 
-    width = 15/2.54, height = 5/2.54, fonts = 'Arial', pointsize = 12)
-par(mfrow = c(1,3), oma = c(0.5,0.25,0.25,0.25), mar = c(1.6,1.6,1.1,0.5), mgp = c(0.7,0,-0.1), family = 'Arial',
-    cex.axis=0.5, cex.lab=0.5, cex.main=0.7, cex.sub=0.5)
-plot(explained_dev_STN$N_groups,
-     explained_dev_STN$Non_explained_deviance,
-     bty = 'n', ylim = c(0, ceiling(10*max(explained_dev_STN$Non_explained_deviance))/10),
-     xlim = c(0,15),
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Linear scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%)', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,ceiling(10*max(explained_dev_STN$Non_explained_deviance))/10,0.25),
-     labels = seq(0,ceiling(10*max(explained_dev_STN$Non_explained_deviance))/10,0.25)*100, lwd = 0.5, tck=-0.02)
-abline(v = 3, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_STN$N_groups,
-     (explained_dev_STN$Non_explained_deviance),
-     log = 'y',
-     xlim = c(0,15),
-     ylim = c(0.1,1),
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Log scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%) - log scale', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = c(10,25,50,100)/100,
-     labels = c(10,25,50,100), lwd = 0.5, tck=-0.02)
-abline(v = 3, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_STN$N_groups[-1],
-     -diff(explained_dev_STN$Non_explained_deviance),
-     xlim = c(0,15),
-     ylim = c(0.001,0.5),
-     # log = 'y',
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Improvement in explained deviance', cex = 0.5, 
-     ylab = 'Improvement in explained deviance', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,0.5,0.25),
-     labels = seq(0,0.5,0.25), lwd = 0.5, tck=-0.02)
-abline(v = 3, lwd = 2, lty = 2, col = 'chartreuse4')
-dev.off()
-## Chosen iteration
-## 3
-## dev explained = XX
-#############################################################
-
-
-#############################################################
-## Plot non-STN
-#############################################################
-pdf('Elbow_plot_explained_deviance_N_groups_SSonnei_nonSTN_20251007.pdf', 
-    width = 15/2.54, height = 5/2.54, fonts = 'Arial', pointsize = 12)
-par(mfrow = c(1,3), oma = c(0.5,0.25,0.25,0.25), mar = c(1.6,1.6,1.1,0.5), mgp = c(0.7,0,-0.1), family = 'Arial',
-    cex.axis=0.5, cex.lab=0.5, cex.main=0.7, cex.sub=0.5)
-plot(explained_dev_nonSTN$N_groups,
-     explained_dev_nonSTN$Non_explained_deviance,
-     bty = 'n', ylim = c(0, ceiling(10*max(explained_dev_nonSTN$Non_explained_deviance))/10),
-     xlim = c(0,15),
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Linear scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%)', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,ceiling(10*max(explained_dev_nonSTN$Non_explained_deviance))/10,0.25),
-     labels = seq(0,ceiling(10*max(explained_dev_nonSTN$Non_explained_deviance))/10,0.25)*100, lwd = 0.5, tck=-0.02)
-abline(v = 8, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_nonSTN$N_groups,
-     (explained_dev_nonSTN$Non_explained_deviance),
-     log = 'y',
-     xlim = c(0,15),
-     ylim = c(0.1,1),
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Log scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%) - log scale', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = c(10,25,50,100)/100,
-     labels = c(10,25,50,100), lwd = 0.5, tck=-0.02)
-abline(v = 8, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_nonSTN$N_groups[-1],
-     -diff(explained_dev_nonSTN$Non_explained_deviance),
-     xlim = c(0,15),
-     ylim = c(0.001,0.5),
-     # log = 'y',
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Improvement in explained deviance', cex = 0.5, 
-     ylab = 'Improvement in explained deviance', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,0.5,0.25),
-     labels = seq(0,0.5,0.25), lwd = 0.5, tck=-0.02)
-abline(v = 8, lwd = 2, lty = 2, col = 'chartreuse4')
-dev.off()
-## Chosen iteration
-## 8
-## dev explained = XX
-#############################################################
-
-
-#############################################################
-## Plot pMSM
-#############################################################
-pdf('Elbow_plot_explained_deviance_N_groups_SSonnei_pMSM_20251007.pdf', 
-    width = 15/2.54, height = 5/2.54, fonts = 'Arial', pointsize = 12)
-par(mfrow = c(1,3), oma = c(0.5,0.25,0.25,0.25), mar = c(1.6,1.6,1.1,0.5), mgp = c(0.7,0,-0.1), family = 'Arial',
-    cex.axis=0.5, cex.lab=0.5, cex.main=0.7, cex.sub=0.5)
-plot(explained_dev_pMSM$N_groups,
-     explained_dev_pMSM$Non_explained_deviance,
-     bty = 'n', ylim = c(0, ceiling(10*max(explained_dev_pMSM$Non_explained_deviance))/10),
-     xlim = c(0,15),
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Linear scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%)', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,ceiling(10*max(explained_dev_pMSM$Non_explained_deviance))/10,0.25),
-     labels = seq(0,ceiling(10*max(explained_dev_pMSM$Non_explained_deviance))/10,0.25)*100, lwd = 0.5, tck=-0.02)
-abline(v = 8, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_pMSM$N_groups,
-     (explained_dev_pMSM$Non_explained_deviance),
-     log = 'y',
-     xlim = c(0,15),
-     ylim = c(0.1,1),
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Log scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%) - log scale', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = c(10,25,50,100)/100,
-     labels = c(10,25,50,100), lwd = 0.5, tck=-0.02)
-abline(v = 8, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_pMSM$N_groups[-1],
-     -diff(explained_dev_pMSM$Non_explained_deviance),
-     xlim = c(0,15),
-     ylim = c(0.001,0.5),
-     # log = 'y',
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Improvement in explained deviance', cex = 0.5, 
-     ylab = 'Improvement in explained deviance', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,0.5,0.25),
-     labels = seq(0,0.5,0.25), lwd = 0.5, tck=-0.02)
-abline(v = 8, lwd = 2, lty = 2, col = 'chartreuse4')
-dev.off()
-## Chosen iteration
-## 8
-#############################################################
-
-
-#############################################################
-## Plot non-pMSM
-#############################################################
-pdf('Elbow_plot_explained_deviance_N_groups_SSonnei_nonpMSM_20251007.pdf', 
-    width = 15/2.54, height = 5/2.54, fonts = 'Arial', pointsize = 12)
-par(mfrow = c(1,3), oma = c(0.5,0.25,0.25,0.25), mar = c(1.6,1.6,1.1,0.5), mgp = c(0.7,0,-0.1), family = 'Arial',
-    cex.axis=0.5, cex.lab=0.5, cex.main=0.7, cex.sub=0.5)
-plot(explained_dev_nonpMSM$N_groups,
-     explained_dev_nonpMSM$Non_explained_deviance,
-     bty = 'n', ylim = c(0, ceiling(10*max(explained_dev_nonpMSM$Non_explained_deviance))/10),
-     xlim = c(0,15),
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Linear scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%)', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,ceiling(10*max(explained_dev_nonpMSM$Non_explained_deviance))/10,0.25),
-     labels = seq(0,ceiling(10*max(explained_dev_nonpMSM$Non_explained_deviance))/10,0.25)*100, lwd = 0.5, tck=-0.02)
-abline(v = 7, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_nonpMSM$N_groups,
-     (explained_dev_nonpMSM$Non_explained_deviance),
-     log = 'y',
-     xlim = c(0,15),
-     ylim = c(0.1,1),
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Log scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%) - log scale', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = c(10,25,50,100)/100,
-     labels = c(10,25,50,100), lwd = 0.5, tck=-0.02)
-abline(v = 7, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_nonpMSM$N_groups[-1],
-     -diff(explained_dev_nonpMSM$Non_explained_deviance),
-     xlim = c(0,15),
-     ylim = c(0.001,0.5),
-     # log = 'y',
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Improvement in explained deviance', cex = 0.5, 
-     ylab = 'Improvement in explained deviance', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,0.5,0.25),
-     labels = seq(0,0.5,0.25), lwd = 0.5, tck=-0.02)
-abline(v = 7, lwd = 2, lty = 2, col = 'chartreuse4')
-dev.off()
-## Chosen iteration
-## 7
-#############################################################
-
-#############################################################
-## Plot MSM pandemic
-#############################################################
-pdf('Elbow_plot_explained_deviance_N_groups_SSonnei_MSM_pandemic_20251007.pdf', 
-    width = 15/2.54, height = 5/2.54, fonts = 'Arial', pointsize = 12)
-par(mfrow = c(1,3), oma = c(0.5,0.25,0.25,0.25), mar = c(1.6,1.6,1.1,0.5), mgp = c(0.7,0,-0.1), family = 'Arial',
-    cex.axis=0.5, cex.lab=0.5, cex.main=0.7, cex.sub=0.5)
-plot(explained_dev_MSM_pandemic$N_groups,
-     explained_dev_MSM_pandemic$Non_explained_deviance,
-     bty = 'n', ylim = c(0, 0.25),
-     xlim = c(0,10),
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Linear scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%)', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,0.25,0.05),
-     labels = seq(0,0.25,0.05)*100, lwd = 0.5, tck=-0.02)
-abline(v = 5, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_MSM_pandemic$N_groups,
-     (explained_dev_MSM_pandemic$Non_explained_deviance),
-     log = 'y',
-     xlim = c(0,10),
-     ylim = c(0.01,0.25),
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Log scale', cex = 0.5, 
-     ylab = 'Non-explained deviance (%) - log scale', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = c(1,10,25,50,100)/100,
-     labels = c(1,10,25,50,100), lwd = 0.5, tck=-0.02)
-abline(v = 5, lwd = 2, lty = 2, col = 'chartreuse4')
-plot(explained_dev_MSM_pandemic$N_groups[-1],
-     -diff(explained_dev_MSM_pandemic$Non_explained_deviance),
-     xlim = c(0,10),
-     ylim = c(0.001,0.2),
-     # log = 'y',
-     bty = 'n',
-     xaxt = 'n', yaxt = 'n', pch = 16, main = 'Improvement in explained deviance', cex = 0.5, 
-     ylab = 'Improvement in explained deviance', xlab = 'Number of groups')
-axis(1, lwd = 0.5, tck=-0.02)
-axis(2, las = 2, at = seq(0,0.2,0.1),
-     labels = seq(0,0.2,0.1), lwd = 0.5, tck=-0.02)
-abline(v = 5, lwd = 2, lty = 2, col = 'chartreuse4')
-dev.off()
-## Chosen iteration
-## 5
 #############################################################
 

@@ -1,5 +1,5 @@
 ########################################################################################################################################
-## 1.1: Sort datasets and compute index, output: Initial_index_computation_and_parameters_20251007.Rdata
+## 1.1: Sort datasets and compute index, output: Initial_index_computation_and_parameters_20251218.Rdata
 ########################################################################################################################################
 ## Packages used
 library(stringr)
@@ -19,7 +19,7 @@ loadfonts(device="all")
 ########################################################################################################################################
 ## Useful functions
 ########################################################################################################################################
-## Load index functions
+## Load index functions (from phylowave githhub https://github.com/noemielefrancq/Phylowave_Learning-fitness-dynamics-pathogens-in-phylogenies)
 source('~/Dropbox/Projects/202312_Index_paper_methods_Sc2_H3N2_BP_TB/Phylowave_Learning-fitness-dynamics-pathogens-in-phylogenies/2_Functions/2_1_Index_computation_20240909.R')
 source('~/Dropbox/Projects/202312_Index_paper_methods_Sc2_H3N2_BP_TB/Phylowave_Learning-fitness-dynamics-pathogens-in-phylogenies/2_Functions/2_2_Lineage_detection_20240909.R')
 
@@ -206,49 +206,23 @@ bactres = readRDS('1_Data/ssonneigeospatialbacdate030524.rds')
 tree = ladderize(bactres$tree, right = F)
 tree$node.label = paste0('NODE', 1:tree$Nnode)
 dates = bactres$record[1:length(tree$tip.label)]
-metadata = read.csv('1_Data/datforphylowave052525.csv') ## Contains only sequences up to Feb 2020
-metadata_msm_new_lineage = read.csv('1_Data/msm_data_red040925.csv') ## Contains only sequences up to Feb 2020
-# metadata_dorothy = read.csv('1_Data/STN_def_Dorothy_2025.csv') ## Contains only sequences up to Feb 2020
-
-## New def by Dorothy
-# metadata$STNGroups = metadata_dorothy$STN_lineage_isolate[match(metadata$Accession, metadata_dorothy$Accession)]
-# # metadata$Travel = metadata_dorothy$Patient_travel[match(metadata$Accession, metadata_dorothy$Accession)]
-# metadata$STNGroups[which(metadata$STNGroups == 'Yes')] = 'STN'
-# metadata$STNGroups[which(metadata$STNGroups == 'No')] = 'non-STN'
-# metadata$Group = paste0(metadata_dorothy$Patient_sex[match(metadata$Accession, metadata_dorothy$Accession)], '_', 
-#                         metadata_dorothy$Patient_age[match(metadata$Accession, metadata_dorothy$Accession)])
-# metadata$Group[which(metadata$Group != 'Male_Adult')] = 'non-pMSM'
-# metadata$Group[which(metadata$Group == 'Male_Adult')] = 'pMSM'
+metadata = read.csv('1_Data/datforphylowave121625.csv') ## Contains only sequences up to Feb 2020
 
 ## Names all sequences
 names_seqs = tree$tip.label
-names_seqs_STN = metadata$Accession[which(metadata$STNGroups == 'STN')]
-names_seqs_nonSTN = metadata$Accession[which(metadata$STNGroups == 'non-STN')]
-names_seqs_travelSTN = metadata$Accession[which(metadata$STNGroups == 'Travel')]
 names_seqs_pMSM = metadata$Accession[which(metadata$Group == 'pMSM')]
 names_seqs_nonpMSM = metadata$Accession[which(metadata$Group == 'non-pMSM')]
 names_seqs_travelpMSM = metadata$Accession[which(metadata$Group == 'Travel')]
 
 ## Trees all sequences
 tree = drop.tip(tree, tip = tree$tip.label[which(is.na(match(tree$tip.label, metadata$Accession)))])
-tree_STN = drop.tip(tree, tip = names_seqs[which(is.na(match(names_seqs, names_seqs_STN)))])
-tree_nonSTN = drop.tip(tree, tip = names_seqs[which(is.na(match(names_seqs, names_seqs_nonSTN)))])
-tree_travelSTN = drop.tip(tree, tip = names_seqs[which(is.na(match(names_seqs, names_seqs_travelSTN)))])
 tree_pMSM = drop.tip(tree, tip = names_seqs[which(is.na(match(names_seqs, names_seqs_pMSM)))])
 tree_nonpMSM = drop.tip(tree, tip = names_seqs[which(is.na(match(names_seqs, names_seqs_nonpMSM)))])
 tree_travelpMSM = drop.tip(tree, tip = names_seqs[which(is.na(match(names_seqs, names_seqs_travelpMSM)))])
 names_seqs = tree$tip.label
-names_seqs_STN = tree_STN$tip.label
-names_seqs_nonSTN = tree_nonSTN$tip.label
-names_seqs_travelSTN = tree_travelSTN$tip.label
 names_seqs_pMSM = tree_pMSM$tip.label
 names_seqs_nonpMSM = tree_nonpMSM$tip.label
 names_seqs_travelpMSM = tree_travelpMSM$tip.label
-
-## MSM only tree
-bactres_MSM_pandemic = readRDS('1_Data/MSMssonneigeospatialbacdate011125_new.rds')
-tree_MSM_pandemic = ladderize(bactres_MSM_pandemic$tree, right = F)
-names_seqs_MSM_pandemic = tree_MSM_pandemic$tip.label
 
 ## Mutation rate
 mu = 6.39E-7 ## in mutations/site/year
@@ -271,24 +245,6 @@ dataset_tips = data.frame('ID' = 1:length(names_seqs),
                                  'time' = NA)
 dataset_tips$time = as.numeric(dataset_tips$time)
 
-## STN
-dataset_tips_STN = data.frame('ID' = 1:length(names_seqs_STN),
-                          'name_seq' = names_seqs_STN,
-                          'time' = NA)
-dataset_tips_STN$time = as.numeric(dataset_tips_STN$time)
-
-## Non-STN
-dataset_tips_nonSTN = data.frame('ID' = 1:length(names_seqs_nonSTN),
-                              'name_seq' = names_seqs_nonSTN,
-                              'time' = NA)
-dataset_tips_nonSTN$time = as.numeric(dataset_tips_nonSTN$time)
-
-## Travel STN
-dataset_tips_travelSTN = data.frame('ID' = 1:length(names_seqs_travelSTN),
-                                     'name_seq' = names_seqs_travelSTN,
-                                     'time' = NA)
-dataset_tips_travelSTN$time = as.numeric(dataset_tips_travelSTN$time)
-
 ## pMSM
 dataset_tips_pMSM = data.frame('ID' = 1:length(names_seqs_pMSM),
                               'name_seq' = names_seqs_pMSM,
@@ -306,12 +262,6 @@ dataset_tips_travelpMSM = data.frame('ID' = 1:length(names_seqs_travelpMSM),
                                'name_seq' = names_seqs_travelpMSM,
                                'time' = NA)
 dataset_tips_travelpMSM$time = as.numeric(dataset_tips_travelpMSM$time)
-
-## MSM pandemic
-dataset_tips_MSM_pandemic = data.frame('ID' = 1:length(names_seqs_MSM_pandemic),
-                              'name_seq' = names_seqs_MSM_pandemic,
-                              'time' = NA)
-dataset_tips_MSM_pandemic$time = as.numeric(dataset_tips_MSM_pandemic$time)
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -333,68 +283,12 @@ dataset_with_nodes = data.frame('ID' = c(1:length(names_seqs), length(names_seqs
                                 'name_seq2' = c(names_seqs, tree$node.label),
                                 'time' = all_nodes_heights,
                                 'is.node' = c(rep('no', length(names_seqs)), rep('yes', (length(names_seqs)-1))),
-                                'STN' = c(metadata$STNGroups[match(names_seqs, metadata$Accession)], rep(NA, (length(names_seqs)-1))),
                                 'AMRany' = c(metadata$AMRany[match(names_seqs, metadata$Accession)], rep(NA, (length(names_seqs)-1))),
                                 'ESBLR' = c(metadata$ESBLR[match(names_seqs, metadata$Accession)], rep(NA, (length(names_seqs)-1))),
                                 'CiprofloxacinR' = c(metadata$CiprofloxacinR[match(names_seqs, metadata$Accession)], rep(NA, (length(names_seqs)-1))),
                                 'AzithromycinR' = c(metadata$AzithromycinR[match(names_seqs, metadata$Accession)], rep(NA, (length(names_seqs)-1))),
                                 'Genotype' = c(metadata$Genotype[match(names_seqs, metadata$Accession)], rep(NA, (length(names_seqs)-1))),
                                 'pmsmdemdef' = c(metadata$Group[match(names_seqs, metadata$Accession)], rep(NA, (length(names_seqs)-1))))
-
-## STN
-## Compute distance between each pair of sequences AND NODES in the tree
-genetic_distance_mat_STN = dist.nodes.with.names(tree_STN)
-
-# Meta-data with nodes 
-dataset_with_nodes_STN = data.frame('ID' = c(1:length(names_seqs_STN), length(names_seqs_STN)+(1:(length(names_seqs_STN)-1))),
-                                'name_seq' = c(names_seqs_STN, length(names_seqs_STN)+(1:(length(names_seqs_STN)-1))),
-                                'name_seq2' = c(names_seqs_STN, tree_STN$node.label),
-                                'time' = dataset_with_nodes$time[match(c(names_seqs_STN, tree_STN$node.label), dataset_with_nodes$name_seq2)],
-                                'is.node' = c(rep('no', length(names_seqs_STN)), rep('yes', (length(names_seqs_STN)-1))),
-                                'STN' = c(metadata$STNGroups[match(names_seqs_STN, metadata$Accession)], rep(NA, (length(names_seqs_STN)-1))),
-                                'AMRany' = c(metadata$AMRany[match(names_seqs_STN, metadata$Accession)], rep(NA, (length(names_seqs_STN)-1))),
-                                'ESBLR' = c(metadata$ESBLR[match(names_seqs_STN, metadata$Accession)], rep(NA, (length(names_seqs_STN)-1))),
-                                'CiprofloxacinR' = c(metadata$CiprofloxacinR[match(names_seqs_STN, metadata$Accession)], rep(NA, (length(names_seqs_STN)-1))),
-                                'AzithromycinR' = c(metadata$AzithromycinR[match(names_seqs_STN, metadata$Accession)], rep(NA, (length(names_seqs_STN)-1))),
-                                'Genotype' = c(metadata$Genotype[match(names_seqs_STN, metadata$Accession)], rep(NA, (length(names_seqs_STN)-1))),
-                                'pmsmdemdef' = c(metadata$Group[match(names_seqs_STN, metadata$Accession)], rep(NA, (length(names_seqs_STN)-1))))
-
-## Non-STN
-## Compute distance between each pair of sequences AND NODES in the tree
-genetic_distance_mat_nonSTN = dist.nodes.with.names(tree_nonSTN)
-
-# Meta-data with nodes 
-dataset_with_nodes_nonSTN = data.frame('ID' = c(1:length(names_seqs_nonSTN), length(names_seqs_nonSTN)+(1:(length(names_seqs_nonSTN)-1))),
-                                    'name_seq' = c(names_seqs_nonSTN, length(names_seqs_nonSTN)+(1:(length(names_seqs_nonSTN)-1))),
-                                    'name_seq2' = c(names_seqs_nonSTN, tree_nonSTN$node.label),
-                                    'time' = dataset_with_nodes$time[match(c(names_seqs_nonSTN, tree_nonSTN$node.label), dataset_with_nodes$name_seq2)],
-                                    'is.node' = c(rep('no', length(names_seqs_nonSTN)), rep('yes', (length(names_seqs_nonSTN)-1))),
-                                    'STN' = c(metadata$STNGroups[match(names_seqs_nonSTN, metadata$Accession)], rep(NA, (length(names_seqs_nonSTN)-1))),
-                                    'AMRany' = c(metadata$AMRany[match(names_seqs_nonSTN, metadata$Accession)], rep(NA, (length(names_seqs_nonSTN)-1))),
-                                    'ESBLR' = c(metadata$ESBLR[match(names_seqs_nonSTN, metadata$Accession)], rep(NA, (length(names_seqs_nonSTN)-1))),
-                                    'CiprofloxacinR' = c(metadata$CiprofloxacinR[match(names_seqs_nonSTN, metadata$Accession)], rep(NA, (length(names_seqs_nonSTN)-1))),
-                                    'AzithromycinR' = c(metadata$AzithromycinR[match(names_seqs_nonSTN, metadata$Accession)], rep(NA, (length(names_seqs_nonSTN)-1))),
-                                    'Genotype' = c(metadata$Genotype[match(names_seqs_nonSTN, metadata$Accession)], rep(NA, (length(names_seqs_nonSTN)-1))),
-                                    'pmsmdemdef' = c(metadata$Group[match(names_seqs_nonSTN, metadata$Accession)], rep(NA, (length(names_seqs_nonSTN)-1))))
-
-
-## Travel travelSTN
-## Compute distance between each pair of sequences AND NODES in the tree
-genetic_distance_mat_travelSTN = dist.nodes.with.names(tree_travelSTN)
-
-# Meta-data with nodes 
-dataset_with_nodes_travelSTN = data.frame('ID' = c(1:length(names_seqs_travelSTN), length(names_seqs_travelSTN)+(1:(length(names_seqs_travelSTN)-1))),
-                                           'name_seq' = c(names_seqs_travelSTN, length(names_seqs_travelSTN)+(1:(length(names_seqs_travelSTN)-1))),
-                                           'name_seq2' = c(names_seqs_travelSTN, tree_travelSTN$node.label),
-                                           'time' = dataset_with_nodes$time[match(c(names_seqs_travelSTN, tree_travelSTN$node.label), dataset_with_nodes$name_seq2)],
-                                           'is.node' = c(rep('no', length(names_seqs_travelSTN)), rep('yes', (length(names_seqs_travelSTN)-1))),
-                                           'travelSTN' = c(metadata$STNGroups[match(names_seqs_travelSTN, metadata$Accession)], rep(NA, (length(names_seqs_travelSTN)-1))),
-                                           'AMRany' = c(metadata$AMRany[match(names_seqs_travelSTN, metadata$Accession)], rep(NA, (length(names_seqs_travelSTN)-1))),
-                                           'ESBLR' = c(metadata$ESBLR[match(names_seqs_travelSTN, metadata$Accession)], rep(NA, (length(names_seqs_travelSTN)-1))),
-                                           'CiprofloxacinR' = c(metadata$CiprofloxacinR[match(names_seqs_travelSTN, metadata$Accession)], rep(NA, (length(names_seqs_travelSTN)-1))),
-                                           'AzithromycinR' = c(metadata$AzithromycinR[match(names_seqs_travelSTN, metadata$Accession)], rep(NA, (length(names_seqs_travelSTN)-1))),
-                                           'Genotype' = c(metadata$Genotype[match(names_seqs_travelSTN, metadata$Accession)], rep(NA, (length(names_seqs_travelSTN)-1))),
-                                           'travelSTNdemdef' = c(metadata$Group[match(names_seqs_travelSTN, metadata$Accession)], rep(NA, (length(names_seqs_travelSTN)-1))))
 
 ## pMSM
 ## Compute distance between each pair of sequences AND NODES in the tree
@@ -406,7 +300,7 @@ dataset_with_nodes_pMSM = data.frame('ID' = c(1:length(names_seqs_pMSM), length(
                                     'name_seq2' = c(names_seqs_pMSM, tree_pMSM$node.label),
                                     'time' = dataset_with_nodes$time[match(c(names_seqs_pMSM, tree_pMSM$node.label), dataset_with_nodes$name_seq2)],
                                     'is.node' = c(rep('no', length(names_seqs_pMSM)), rep('yes', (length(names_seqs_pMSM)-1))),
-                                    'pMSM' = c(metadata$STNGroups[match(names_seqs_pMSM, metadata$Accession)], rep(NA, (length(names_seqs_pMSM)-1))),
+                                    'pMSM' = c(metadata$Group[match(names_seqs_pMSM, metadata$Accession)], rep(NA, (length(names_seqs_pMSM)-1))),
                                     'AMRany' = c(metadata$AMRany[match(names_seqs_pMSM, metadata$Accession)], rep(NA, (length(names_seqs_pMSM)-1))),
                                     'ESBLR' = c(metadata$ESBLR[match(names_seqs_pMSM, metadata$Accession)], rep(NA, (length(names_seqs_pMSM)-1))),
                                     'CiprofloxacinR' = c(metadata$CiprofloxacinR[match(names_seqs_pMSM, metadata$Accession)], rep(NA, (length(names_seqs_pMSM)-1))),
@@ -424,7 +318,7 @@ dataset_with_nodes_nonpMSM = data.frame('ID' = c(1:length(names_seqs_nonpMSM), l
                                        'name_seq2' = c(names_seqs_nonpMSM, tree_nonpMSM$node.label),
                                        'time' = dataset_with_nodes$time[match(c(names_seqs_nonpMSM, tree_nonpMSM$node.label), dataset_with_nodes$name_seq2)],
                                        'is.node' = c(rep('no', length(names_seqs_nonpMSM)), rep('yes', (length(names_seqs_nonpMSM)-1))),
-                                       'pMSM' = c(metadata$STNGroups[match(names_seqs_nonpMSM, metadata$Accession)], rep(NA, (length(names_seqs_nonpMSM)-1))),
+                                       'pMSM' = c(metadata$Group[match(names_seqs_nonpMSM, metadata$Accession)], rep(NA, (length(names_seqs_nonpMSM)-1))),
                                        'AMRany' = c(metadata$AMRany[match(names_seqs_nonpMSM, metadata$Accession)], rep(NA, (length(names_seqs_nonpMSM)-1))),
                                        'ESBLR' = c(metadata$ESBLR[match(names_seqs_nonpMSM, metadata$Accession)], rep(NA, (length(names_seqs_nonpMSM)-1))),
                                        'CiprofloxacinR' = c(metadata$CiprofloxacinR[match(names_seqs_nonpMSM, metadata$Accession)], rep(NA, (length(names_seqs_nonpMSM)-1))),
@@ -442,41 +336,13 @@ dataset_with_nodes_travelpMSM = data.frame('ID' = c(1:length(names_seqs_travelpM
                                      'name_seq2' = c(names_seqs_travelpMSM, tree_travelpMSM$node.label),
                                      'time' = dataset_with_nodes$time[match(c(names_seqs_travelpMSM, tree_travelpMSM$node.label), dataset_with_nodes$name_seq2)],
                                      'is.node' = c(rep('no', length(names_seqs_travelpMSM)), rep('yes', (length(names_seqs_travelpMSM)-1))),
-                                     'travelpMSM' = c(metadata$STNGroups[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
+                                     'travelpMSM' = c(metadata$Group[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'AMRany' = c(metadata$AMRany[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'ESBLR' = c(metadata$ESBLR[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'CiprofloxacinR' = c(metadata$CiprofloxacinR[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'AzithromycinR' = c(metadata$AzithromycinR[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'Genotype' = c(metadata$Genotype[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'travelpMSMdemdef' = c(metadata$Group[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))))
-
-## MSM pandemic
-## Compute distance between each pair of sequences AND NODES in the tree
-genetic_distance_mat_MSM_pandemic = dist.nodes.with.names(tree_MSM_pandemic)
-
-## Get the time each node
-nroot = length(tree_MSM_pandemic$tip.label)+1 ## Checked and it's the root 
-distance_to_root = genetic_distance_mat_MSM_pandemic[nroot,]
-root_height_MSM_pandemic = tree_MSM_pandemic$root.time
-nodes_height = root_height_MSM_pandemic + distance_to_root[length(names_seqs_MSM_pandemic)+(1:(length(names_seqs_MSM_pandemic)-1))]
-all_nodes_heights_MSM_pandemic = root_height_MSM_pandemic + distance_to_root
-
-# Meta-data with nodes 
-metadata_msm_new_lineage$AzithromycinR[which(is.na(metadata_msm_new_lineage$AzithromycinR))] = 0
-metadata_msm_new_lineage$ESBLR[which(is.na(metadata_msm_new_lineage$ESBLR))] = 0
-
-dataset_with_nodes_MSM_pandemic = data.frame('ID' = c(1:length(names_seqs_MSM_pandemic), length(names_seqs_MSM_pandemic)+(1:(length(names_seqs_MSM_pandemic)-1))),
-                                    'name_seq' = c(names_seqs_MSM_pandemic, length(names_seqs_MSM_pandemic)+(1:(length(names_seqs_MSM_pandemic)-1))),
-                                    'name_seq2' = c(names_seqs_MSM_pandemic, tree_MSM_pandemic$node.label),
-                                    'time' = all_nodes_heights_MSM_pandemic,
-                                    'is.node' = c(rep('no', length(names_seqs_MSM_pandemic)), rep('yes', (length(names_seqs_MSM_pandemic)-1))),
-                                    'STN' = c(metadata$STNGroups[match(names_seqs_MSM_pandemic, metadata$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
-                                    'AMRany' = c(metadata_msm_new_lineage$AMRany[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
-                                    'ESBLR' = c(metadata_msm_new_lineage$ESBLR[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
-                                    'CiprofloxacinR' = c(metadata_msm_new_lineage$CiprofloxacinR[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
-                                    'AzithromycinR' = c(metadata_msm_new_lineage$AzithromycinR[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
-                                    'Genotype' = c(metadata$Genotype[match(names_seqs_MSM_pandemic, metadata$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
-                                    'pmsmdemdef' = c(metadata$Group[match(names_seqs_MSM_pandemic, metadata$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))))
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -495,18 +361,6 @@ rec_nodes[which(rec_nodes_score < 0.75)] = NA
 rec_all = c(as.numeric(as.character(snp_data)), rec_nodes) ## List of all states: first all tips, then all nodes
 dataset_with_nodes$Genotype = rec_all
 
-## non-STN
-dataset_with_nodes_nonSTN$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_nonSTN$name_seq2, 
-                                                                       dataset_with_nodes$name_seq2)]
-
-## STN
-dataset_with_nodes_STN$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_STN$name_seq2, 
-                                                                    dataset_with_nodes$name_seq2)]
-
-## Travel STN
-dataset_with_nodes_travelSTN$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_travelSTN$name_seq2, 
-                                                                    dataset_with_nodes$name_seq2)]
-
 ## non-pMSM
 dataset_with_nodes_nonpMSM$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_nonpMSM$name_seq2, 
                                                                        dataset_with_nodes$name_seq2)]
@@ -518,10 +372,6 @@ dataset_with_nodes_pMSM$Genotype = dataset_with_nodes$Genotype[match(dataset_wit
 ## Travel pMSM
 dataset_with_nodes_travelpMSM$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_travelpMSM$name_seq2, 
                                                                      dataset_with_nodes$name_seq2)]
-
-## MSM pandemic
-dataset_with_nodes_MSM_pandemic$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_MSM_pandemic$name_seq2, 
-                                                                    dataset_with_nodes$name_seq2)]
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -598,18 +448,6 @@ levels(dataset_with_nodes$Genotype_simplified) = c("ZOthers", "ZOthers",
                                                     "ZOthers",
                                                     "ZOthers")
 
-## non-STN
-dataset_with_nodes_nonSTN$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_nonSTN$name_seq2, 
-                                                                                             dataset_with_nodes$name_seq2)]
-
-## STN
-dataset_with_nodes_STN$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_STN$name_seq2, 
-                                                                                          dataset_with_nodes$name_seq2)]
-
-## Travel STN
-dataset_with_nodes_travelSTN$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_travelSTN$name_seq2, 
-                                                                                          dataset_with_nodes$name_seq2)]
-
 ## non-pMSM
 dataset_with_nodes_nonpMSM$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_nonpMSM$name_seq2, 
                                                                                              dataset_with_nodes$name_seq2)]
@@ -621,10 +459,6 @@ dataset_with_nodes_pMSM$Genotype_simplified = dataset_with_nodes$Genotype_simpli
 ## Travel pMSM
 dataset_with_nodes_travelpMSM$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_travelpMSM$name_seq2, 
                                                                                            dataset_with_nodes$name_seq2)]
-
-## MSM pandemic
-dataset_with_nodes_MSM_pandemic$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_MSM_pandemic$name_seq2, 
-                                                                                                   dataset_with_nodes$name_seq2)]
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -639,27 +473,7 @@ dataset_with_nodes$index = compute.index(time_distance_mat = genetic_distance_ma
                                                 mutation_rate = mu,
                                                 timescale = timescale,
                                                 genome_length = genome_length)
-dataset_with_nodes_STN$index = compute.index(time_distance_mat = genetic_distance_mat_STN, 
-                                             timed_tree = tree_STN, 
-                                             time_window = wind,
-                                             metadata = dataset_with_nodes_STN, 
-                                             mutation_rate = mu,
-                                             timescale = timescale,
-                                             genome_length = genome_length)
-dataset_with_nodes_nonSTN$index = compute.index(time_distance_mat = genetic_distance_mat_nonSTN, 
-                                               timed_tree = tree_nonSTN, 
-                                               time_window = wind,
-                                               metadata = dataset_with_nodes_nonSTN, 
-                                               mutation_rate = mu,
-                                               timescale = timescale,
-                                               genome_length = genome_length)
-dataset_with_nodes_travelSTN$index = compute.index(time_distance_mat = genetic_distance_mat_travelSTN, 
-                                             timed_tree = tree_travelSTN, 
-                                             time_window = wind,
-                                             metadata = dataset_with_nodes_travelSTN, 
-                                             mutation_rate = mu,
-                                             timescale = timescale,
-                                             genome_length = genome_length)
+
 dataset_with_nodes_pMSM$index = compute.index(time_distance_mat = genetic_distance_mat_pMSM, 
                                              timed_tree = tree_pMSM, 
                                              time_window = wind,
@@ -681,16 +495,6 @@ dataset_with_nodes_travelpMSM$index = compute.index(time_distance_mat = genetic_
                                                    mutation_rate = mu,
                                                    timescale = timescale,
                                                    genome_length = genome_length)
-
-timescale_MSM_pandemic = 0.25
-wind = 0.5
-dataset_with_nodes_MSM_pandemic$index = compute.index(time_distance_mat = genetic_distance_mat_MSM_pandemic, 
-                                                timed_tree = tree_MSM_pandemic, 
-                                                time_window = wind,
-                                                metadata = dataset_with_nodes_MSM_pandemic, 
-                                                mutation_rate = mu,
-                                                timescale = timescale_MSM_pandemic,
-                                                genome_length = genome_length)
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -709,27 +513,6 @@ dataset_with_nodes$Genotype_color = factor(tmp, levels = clades)
 levels(dataset_with_nodes$Genotype_color) = colors_clades
 dataset_with_nodes$Genotype_color = as.character(dataset_with_nodes$Genotype_color)
 dataset_with_nodes$Genotype_color[which(is.na(dataset_with_nodes$Genotype_color))] = 'grey'
-
-## STN
-tmp = unlist(lapply(dataset_with_nodes_STN$Genotype, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(3,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_STN$Genotype_color = factor(tmp, levels = clades)
-levels(dataset_with_nodes_STN$Genotype_color) = colors_clades
-dataset_with_nodes_STN$Genotype_color = as.character(dataset_with_nodes_STN$Genotype_color)
-dataset_with_nodes_STN$Genotype_color[which(is.na(dataset_with_nodes_STN$Genotype_color))] = 'grey'
-
-## Non-STN
-tmp = unlist(lapply(dataset_with_nodes_nonSTN$Genotype, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(3,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_nonSTN$Genotype_color = factor(tmp, levels = clades)
-levels(dataset_with_nodes_nonSTN$Genotype_color) = colors_clades
-dataset_with_nodes_nonSTN$Genotype_color = as.character(dataset_with_nodes_nonSTN$Genotype_color)
-dataset_with_nodes_nonSTN$Genotype_color[which(is.na(dataset_with_nodes_nonSTN$Genotype_color))] = 'grey'
-
-## Travel STN
-tmp = unlist(lapply(dataset_with_nodes_travelSTN$Genotype, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(3,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_travelSTN$Genotype_color = factor(tmp, levels = clades)
-levels(dataset_with_nodes_travelSTN$Genotype_color) = colors_clades
-dataset_with_nodes_travelSTN$Genotype_color = as.character(dataset_with_nodes_travelSTN$Genotype_color)
-dataset_with_nodes_travelSTN$Genotype_color[which(is.na(dataset_with_nodes_travelSTN$Genotype_color))] = 'grey'
 
 ## pMSM
 tmp = unlist(lapply(dataset_with_nodes_pMSM$Genotype, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(3,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
@@ -751,13 +534,6 @@ dataset_with_nodes_travelpMSM$Genotype_color = factor(tmp, levels = clades)
 levels(dataset_with_nodes_travelpMSM$Genotype_color) = colors_clades
 dataset_with_nodes_travelpMSM$Genotype_color = as.character(dataset_with_nodes_travelpMSM$Genotype_color)
 dataset_with_nodes_travelpMSM$Genotype_color[which(is.na(dataset_with_nodes_travelpMSM$Genotype_color))] = 'grey'
-
-## MSM pandemic
-tmp = unlist(lapply(dataset_with_nodes_MSM_pandemic$Genotype, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(3,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_MSM_pandemic$Genotype_color = factor(tmp, levels = clades)
-levels(dataset_with_nodes_MSM_pandemic$Genotype_color) = colors_clades
-dataset_with_nodes_MSM_pandemic$Genotype_color = as.character(dataset_with_nodes_MSM_pandemic$Genotype_color)
-dataset_with_nodes_MSM_pandemic$Genotype_color[which(is.na(dataset_with_nodes_MSM_pandemic$Genotype_color))] = 'grey'
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -776,27 +552,6 @@ dataset_with_nodes$Genotype_simplified_color = factor(tmp, levels = clades_simpl
 levels(dataset_with_nodes$Genotype_simplified_color) = colors_clades_simplified
 dataset_with_nodes$Genotype_simplified_color = as.character(dataset_with_nodes$Genotype_simplified_color)
 dataset_with_nodes$Genotype_simplified_color[which(is.na(dataset_with_nodes$Genotype_simplified_color))] = 'grey'
-
-## STN
-tmp = unlist(lapply(dataset_with_nodes_STN$Genotype_simplified, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(10,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_STN$Genotype_simplified_color = factor(tmp, levels = clades_simplified)
-levels(dataset_with_nodes_STN$Genotype_simplified_color) = colors_clades_simplified
-dataset_with_nodes_STN$Genotype_simplified_color = as.character(dataset_with_nodes_STN$Genotype_simplified_color)
-dataset_with_nodes_STN$Genotype_simplified_color[which(is.na(dataset_with_nodes_STN$Genotype_simplified_color))] = 'grey'
-
-## Non-STN
-tmp = unlist(lapply(dataset_with_nodes_nonSTN$Genotype_simplified, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(10,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_nonSTN$Genotype_simplified_color = factor(tmp, levels = clades_simplified)
-levels(dataset_with_nodes_nonSTN$Genotype_simplified_color) = colors_clades_simplified
-dataset_with_nodes_nonSTN$Genotype_simplified_color = as.character(dataset_with_nodes_nonSTN$Genotype_simplified_color)
-dataset_with_nodes_nonSTN$Genotype_simplified_color[which(is.na(dataset_with_nodes_nonSTN$Genotype_simplified_color))] = 'grey'
-
-## Travel STN
-tmp = unlist(lapply(dataset_with_nodes_travelSTN$Genotype_simplified, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(10,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_travelSTN$Genotype_simplified_color = factor(tmp, levels = clades_simplified)
-levels(dataset_with_nodes_travelSTN$Genotype_simplified_color) = colors_clades_simplified
-dataset_with_nodes_travelSTN$Genotype_simplified_color = as.character(dataset_with_nodes_travelSTN$Genotype_simplified_color)
-dataset_with_nodes_travelSTN$Genotype_simplified_color[which(is.na(dataset_with_nodes_travelSTN$Genotype_simplified_color))] = 'grey'
 
 ## pMSM
 tmp = unlist(lapply(dataset_with_nodes_pMSM$Genotype_simplified, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(10,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
@@ -818,18 +573,11 @@ dataset_with_nodes_travelpMSM$Genotype_simplified_color = factor(tmp, levels = c
 levels(dataset_with_nodes_travelpMSM$Genotype_simplified_color) = colors_clades_simplified
 dataset_with_nodes_travelpMSM$Genotype_simplified_color = as.character(dataset_with_nodes_travelpMSM$Genotype_simplified_color)
 dataset_with_nodes_travelpMSM$Genotype_simplified_color[which(is.na(dataset_with_nodes_travelpMSM$Genotype_simplified_color))] = 'grey'
-
-## MSM pandemic
-tmp = unlist(lapply(dataset_with_nodes_MSM_pandemic$Genotype_simplified, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(10,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
-dataset_with_nodes_MSM_pandemic$Genotype_simplified_color = factor(tmp, levels = clades_simplified)
-levels(dataset_with_nodes_MSM_pandemic$Genotype_simplified_color) = colors_clades_simplified
-dataset_with_nodes_MSM_pandemic$Genotype_simplified_color = as.character(dataset_with_nodes_MSM_pandemic$Genotype_simplified_color)
-dataset_with_nodes_MSM_pandemic$Genotype_simplified_color[which(is.na(dataset_with_nodes_MSM_pandemic$Genotype_simplified_color))] = 'grey'
 ########################################################################################################################################
 
 ########################################################################################################################################
 ## Save results
 ########################################################################################################################################
-save.image(file='2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251007.Rdata')
+save.image(file='2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251218.Rdata')
 ########################################################################################################################################
 

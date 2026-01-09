@@ -1,5 +1,5 @@
 ########################################################################################################################################
-## Detect lineages, input: Initial_index_computation_and_parameters_20251007.Rdata
+## Detect lineages, input: Initial_index_computation_and_parameters_20251218.Rdata
 ########################################################################################################################################
 ## Packages used
 library(ape)
@@ -10,7 +10,7 @@ library(thd)
 library(snow)
 library(doParallel)
 
-load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251007.Rdata')
+load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251218.Rdata')
 
 ########################################################################################################################################
 ## Useful functions
@@ -240,94 +240,6 @@ saveRDS(potential_splits_weighting, paste0('2_analysis_index/2_find_index_groups
 ######################################################################################################################################
 
 
-
-######################################################################################################################################
-### STN and non-STN, separatly ####
-######################################################################################################################################
-
-######################################################################################################################################
-## Parameters
-######################################################################################################################################
-## Parameter in common to all algos
-time_window_initial = 2030;
-time_window_increment = 100;
-p_value_smooth = 0.05
-weight_by_time = 1
-k_smooth = -1
-plot_screening = F
-min_descendants_per_tested_node = 30
-min_group_size = 30
-weighting_transformation = c('inv_sqrt')
-
-parallelize_code = T
-number_cores = 3
-
-max_stepwise_deviance_explained_threshold = 0
-max_groups_found = 20
-stepwise_AIC_threshold = 0
-
-keep_track = T
-######################################################################################################################################
-
-######################################################################################################################################
-## Detection lineages - STN
-######################################################################################################################################
-start_time = Sys.time()
-potential_splits_weighting = find.groups.by.index.dynamics(timed_tree = tree_STN,
-                                                               metadata = dataset_with_nodes_STN,
-                                                               node_support = NULL,
-                                                               threshold_node_support = 0.5,
-                                                               time_window_initial,
-                                                               time_window_increment,
-                                                               min_descendants_per_tested_node,
-                                                               min_group_size,
-                                                               p_value_smooth,
-                                                               stepwise_deviance_explained_threshold = max_stepwise_deviance_explained_threshold,
-                                                               stepwise_AIC_threshold,
-                                                               weight_by_time,
-                                                               weighting_transformation,
-                                                               k_smooth,
-                                                               plot_screening,
-                                                               parallelize_code,
-                                                               number_cores = number_cores, 
-                                                               max_groups_found = max_groups_found, 
-                                                               keep_track = keep_track)
-end_time = Sys.time()
-print(end_time - start_time)
-saveRDS(potential_splits_weighting, paste0('2_analysis_index/2_find_index_groups/potential_splits_weighting_STN_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
-######################################################################################################################################
-
-######################################################################################################################################
-## Detection lineages - non STN
-######################################################################################################################################
-start_time = Sys.time()
-potential_splits_weighting = find.groups.by.index.dynamics(timed_tree = tree_nonSTN,
-                                                               metadata = dataset_with_nodes_nonSTN,
-                                                               node_support = NULL,
-                                                               threshold_node_support = 0.5,
-                                                               time_window_initial,
-                                                               time_window_increment,
-                                                               min_descendants_per_tested_node,
-                                                               min_group_size,
-                                                               p_value_smooth,
-                                                               stepwise_deviance_explained_threshold = max_stepwise_deviance_explained_threshold,
-                                                               stepwise_AIC_threshold,
-                                                               weight_by_time,
-                                                               weighting_transformation,
-                                                               k_smooth,
-                                                               plot_screening,
-                                                               parallelize_code,
-                                                               number_cores = number_cores, 
-                                                               max_groups_found = max_groups_found, 
-                                                               keep_track = keep_track)
-end_time = Sys.time()
-print(end_time - start_time)
-saveRDS(potential_splits_weighting, paste0('2_analysis_index/2_find_index_groups/potential_splits_weighting_nonSTN_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
-######################################################################################################################################
-
-
-
-
 ######################################################################################################################################
 ### pMSM and non-pMSM ####
 ######################################################################################################################################
@@ -412,31 +324,3 @@ print(end_time - start_time)
 saveRDS(potential_splits_weighting, paste0('2_analysis_index/2_find_index_groups/potential_splits_weighting_nonpMSM_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
 ######################################################################################################################################
 
-######################################################################################################################################
-## Detection lineages - MSM pandemic
-######################################################################################################################################
-start_time = Sys.time()
-potential_splits_weighting = find.groups.by.index.dynamics(timed_tree = tree_MSM_pandemic,
-                                                               metadata = dataset_with_nodes_MSM_pandemic,
-                                                               node_support = NULL,
-                                                               threshold_node_support = 0.5,
-                                                               time_window_initial,
-                                                               time_window_increment,
-                                                               min_descendants_per_tested_node,
-                                                               min_group_size,
-                                                               p_value_smooth,
-                                                               stepwise_deviance_explained_threshold = max_stepwise_deviance_explained_threshold,
-                                                               stepwise_AIC_threshold,
-                                                               weight_by_time,
-                                                               weighting_transformation,
-                                                               k_smooth,
-                                                               plot_screening,
-                                                               parallelize_code,
-                                                               number_cores = number_cores, 
-                                                               max_groups_found = max_groups_found, 
-                                                               keep_track = keep_track, log_y = F)
-end_time = Sys.time()
-print(end_time - start_time)
-saveRDS(potential_splits_weighting, paste0('2_analysis_index/2_find_index_groups/potential_splits_weighting_MSM_pandemic_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
-######################################################################################################################################eqw rt
- 
