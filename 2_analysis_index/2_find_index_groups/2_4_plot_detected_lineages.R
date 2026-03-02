@@ -17,7 +17,7 @@ library(extrafont)
 loadfonts(device="all")
 
 setwd('~/Dropbox/Projects/2025_Phylowave_SSonnei/Phylowave_SSonnei/')
-load('2_analysis_index/2_find_index_groups/Lineages_detected_20251218.Rdata')
+load('2_analysis_index/2_find_index_groups/Lineages_detected_20260301.Rdata')
 
 ########################################################################################################################################
 ## Plot with groups - full phylogeny
@@ -159,6 +159,60 @@ dev.off()
 ## Write dataset, full phylogeny
 write.csv(dataset_with_nodes_reconstructed, file = 'dataset_with_nodes_20251218_all.csv')
 
+
+########################################################################################################################################
+## Plot with groups - MSM pandemic
+########################################################################################################################################
+pdf('2_analysis_index/2_find_index_groups/Index_SSonnei_with_groups_MSM_pandemic_20260301.pdf', width = 4/2.54, height = 5/2.54, fonts = 'Arial', pointsize = 12)
+par(mfcol = c(2,1), oma = c(0,0,0,0.5), mar = c(1,1,0,0), mgp = c(0,0.1,0), family = 'Arial',
+    cex.axis=0.3, cex.lab=0.3, cex.main=0.5, cex.sub=0.3)
+
+dataset_with_nodes = dataset_with_nodes_MSM_pandemic
+root_height = root_height_MSM_pandemic
+
+min_year = 2014
+max_year = 2022
+max_index = 0.75
+
+## Plot tree
+tree_to_plot = ladderize(tree_MSM_pandemic, right = F)
+plot(tree_to_plot, show.tip.label = FALSE, edge.width = 0.15, edge.color = 'grey', 
+     x.lim = c(min_year, max_year)-root_height)
+tiplabels(pch = 16, col = dataset_with_nodes$group_color[which(dataset_with_nodes$is.node == 'no')], cex = 0.2) # 0.15
+# nodelabels(pch = 16, col = dataset_with_nodes$genotype_color[which(dataset_with_nodes$is.node == 'yes')], cex = 0.5)
+axisPhylo_NL(side = 1, root.time = root_height, backward = F,
+             at_axis = seq(min_year, max_year, 2)-root_height,
+             lab_axis = seq(min_year, max_year, 2), lwd = 0.5, tck=-0.02, mgp = c(0,-0.4,0))
+## Plot thd
+plot(dataset_with_nodes$time[which(dataset_with_nodes$is.node == 'yes')], 
+     dataset_with_nodes$index[which(dataset_with_nodes$is.node == 'yes')], 
+     col = adjustcolor(dataset_with_nodes$group_color[which(dataset_with_nodes$is.node == 'yes')], alpha.f = 1),
+     bty = 'n', xlim = c(min_year, max_year), cex = 0.2,  #0.15
+     pch = 16, bty = 'n', ylim = c(0, max_index), 
+     # main = paste0('World'), 
+     ylab = '', xlab = '', yaxt = 'n', xaxt = 'n')
+points(dataset_with_nodes$time[which(dataset_with_nodes$is.node == 'no')], 
+       dataset_with_nodes$index[which(dataset_with_nodes$is.node == 'no')], 
+       col = adjustcolor(dataset_with_nodes$group_color[which(dataset_with_nodes$is.node == 'no')], alpha.f = 1),
+       cex = 0.2, pch = 16)
+axis(1, at = seq(min_year, max_year, 2), labels = seq(min_year, max_year, 2), lwd = 0.5, tck=-0.02, mgp = c(0,-0.4,0))
+axis(2, las = 2, tck=-0.01, lwd = 0.5)
+title(main="S. Sonnei", line=-0.5, outer = F)
+title(ylab="Index", line=0.5, outer = F)
+title(xlab="Time (years)", line=0, outer = F)
+
+idx = which(!duplicated(dataset_with_nodes$group_color))
+legend('topleft', legend = dataset_with_nodes$groups[idx], col = dataset_with_nodes$group_color[idx], pch = 16, bty = 'n', 
+       cex = 0.25)
+
+dev.off()
+########################################################################################################################################
+
+## Write dataset, full phylogeny
+write.csv(dataset_with_nodes_MSM_pandemic, file = 'dataset_with_nodes_MSM_pandemic_20260301.csv')
+
+
+
 ########################################################################################################################################
 ## Plot model fit
 ## Full
@@ -213,6 +267,59 @@ ggsave(filename = '2_analysis_index/2_find_index_groups/Fit_Index_SSonnei_with_g
        plot = p, device = 'pdf', scale = 1, width = 15, height = 5.5, units = 'cm')
 ########################################################################################################################################
 
+
+
+########################################################################################################################################
+## Plot model fit
+## MSM pandemic
+########################################################################################################################################
+load('2_analysis_index/2_find_index_groups/Lineages_detected_20260301.Rdata')
+library(cowplot)
+
+par(mfcol = c(2,1), oma = c(0,0,0,0.5), mar = c(1,1,0,0), mgp = c(0,0.1,0), family = 'Arial',
+    cex.axis=0.3, cex.lab=0.3, cex.main=0.4, cex.sub=0.3)
+
+min_year = 2014
+max_year = 2022
+max_index = 0.6
+
+potential_splits_model = compute_fit_for_node_set(timed_tree = tree_MSM_pandemic, metadata = dataset_with_nodes_MSM_pandemic, 
+                                                  node_set = potential_splits_MSM_pandemic, weight_by_time = NULL, k_smooth = -1, plot = F, log_y = T) 
+plot_fit_world = function(){
+  par(oma = c(0,0,0,0), mar =  c(2,2,1,0), mgp = c(2,0.5,0))
+  plot(dataset_with_nodes_MSM_pandemic$time, 
+       dataset_with_nodes_MSM_pandemic$index,
+       col = adjustcolor(dataset_with_nodes_MSM_pandemic$group_color, alpha.f = 0.3),
+       bty = 'n', xlim = c(min_year, max_year), cex = 0.5, 
+       pch = 16, ylim = c(0, max_index), 
+       ylab = 'Index', xlab = 'Time (years)', yaxt = 'n', xaxt = 'n')
+  points(dataset_with_nodes_MSM_pandemic$time, 
+         exp(predict(potential_splits_model$mod)), 
+         col = adjustcolor(dataset_with_nodes_MSM_pandemic$group_color, alpha.f = 1),
+         bty = 'n', xlim = c(min_year, max_year), cex = 0.5, 
+         pch = 16)
+  axis(1, at = seq(min_year, max_year, 2), labels = seq(min_year, max_year, 2), lwd = 0.5, tck=-0.015)
+  axis(2, las = 2, tck=-0.015, lwd = 0.5)
+}
+plot_fit_obs_pred = function(){
+  par(oma = c(0,0,0,0.5), mar = c(2,2,1,0), mgp = c(2,0.5,0))
+  idx = sample(1:nrow(dataset_with_nodes_MSM_pandemic))
+  plot(dataset_with_nodes_MSM_pandemic$index[idx], 
+       exp(predict(potential_splits_model$mod))[idx],
+       col = adjustcolor(dataset_with_nodes_MSM_pandemic$group_color[idx], alpha.f = 1),
+       bty = 'n', xlim = c(0, max_index), cex = 0.5, xaxt = 'n',
+       pch = 16, bty = 'n', ylim = c(0, max_index), 
+       ylab = 'Predicted', xlab = 'Observed', yaxt = 'n')
+  abline(a = 0, b = 1, lty = 2)
+  axis(1, at = seq(0, max_index, 0.1), labels = seq(0, max_index, 0.1), lwd = 0.5, tck=-0.015)
+  axis(2, at = seq(0, max_index, 0.1), labels = seq(0, max_index, 0.1), las = 2, tck=-0.015, lwd = 0.5)
+}
+
+p = plot_grid(ggdraw(plot_fit_world), ggdraw(plot_fit_obs_pred),
+              rel_widths = c(2, 1), labels = c('A', 'B'), ncol = 2)
+ggsave(filename = '2_analysis_index/2_find_index_groups/Fit_Index_SSonnei_with_groups_MSM_pandemic_20260301.pdf',
+       plot = p, device = 'pdf', scale = 1, width = 15, height = 5.5, units = 'cm')
+########################################################################################################################################
 
 
 

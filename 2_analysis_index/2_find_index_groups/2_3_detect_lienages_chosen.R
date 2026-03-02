@@ -18,7 +18,7 @@ loadfonts(device="all")
 library(MetBrewer)
 
 setwd('~/Dropbox/Projects/2025_Phylowave_SSonnei/Phylowave_SSonnei/')
-load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251218.Rdata')
+load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20260301.Rdata')
 
 ########################################################################################################################################
 ## Useful functions
@@ -206,6 +206,12 @@ split = merge.groups(timed_tree = tree,
                           metadata = dataset_with_nodes, 
                           initial_splits = potential_splits,
                           group_count_threshold = 5, group_freq_threshold = 0)
+
+potential_splits_MSM_pandemic = readRDS(paste0('2_analysis_index/2_find_index_groups/potential_splits_weighting_MSM_pandemic_202603_', k_smooth, '_min_group_size_', min_group_size, '.rds'))$best_nodes_names[[5]]
+split_MSM_pandemic = merge.groups(timed_tree = tree_MSM_pandemic, 
+                                  metadata = dataset_with_nodes_MSM_pandemic, 
+                                  initial_splits = potential_splits_MSM_pandemic,
+                                  group_count_threshold = 5, group_freq_threshold = 0)
 ######################################################################################################################################
 
 #######################################################################################################################################
@@ -248,6 +254,41 @@ levels(dataset_with_nodes$group_color) = colors_groups
 dataset_with_nodes$group_color = as.character(dataset_with_nodes$group_color)
 #######################################################################################################################################
 
+
+#######################################################################################################################################
+## Assign colour to each group - MSM pandemic
+#######################################################################################################################################
+dataset_with_nodes_MSM_pandemic$groups = as.factor(split_MSM_pandemic$groups)
+name_groups_MSM_pandemic = levels(dataset_with_nodes_MSM_pandemic$groups)
+n_groups_MSM_pandemic <- length(name_groups_MSM_pandemic)
+
+## Reorder labels by time of emergence
+name_groups_MSM_pandemic = levels(dataset_with_nodes_MSM_pandemic$groups)
+time_groups_MSM_pandemic = NULL
+for(i in 1:length(name_groups_MSM_pandemic)){
+  time_groups_MSM_pandemic = c(time_groups_MSM_pandemic, min(dataset_with_nodes_MSM_pandemic$time[which(dataset_with_nodes_MSM_pandemic$groups == name_groups_MSM_pandemic[i] &
+                                                                                                          dataset_with_nodes_MSM_pandemic$is.node == 'no')]))
+}
+levels(dataset_with_nodes_MSM_pandemic$groups) = match(name_groups_MSM_pandemic, order(time_groups_MSM_pandemic, decreasing = T))
+dataset_with_nodes_MSM_pandemic$groups = as.numeric(as.character(dataset_with_nodes_MSM_pandemic$groups))
+dataset_with_nodes_MSM_pandemic$groups = as.factor(dataset_with_nodes_MSM_pandemic$groups)
+## Update split
+split_MSM_pandemic$tip_and_nodes_groups = match(split_MSM_pandemic$tip_and_nodes_groups, order(time_groups_MSM_pandemic, decreasing = T))
+names(split_MSM_pandemic$tip_and_nodes_groups) = 1:length(split_MSM_pandemic$tip_and_nodes_groups)
+split_MSM_pandemic$groups = as.factor(split_MSM_pandemic$groups)
+levels(split_MSM_pandemic$groups) = match(name_groups_MSM_pandemic, order(time_groups_MSM_pandemic, decreasing = T))
+split_MSM_pandemic$groups = as.numeric(as.character(split_MSM_pandemic$groups))
+
+## Choose color palette
+colors_groups_MSM_pandemic = rev(met.brewer(name="Java", n=n_groups_MSM_pandemic, type="continuous"))
+
+## Color each group
+dataset_with_nodes_MSM_pandemic$group_color = dataset_with_nodes_MSM_pandemic$groups
+levels(dataset_with_nodes_MSM_pandemic$group_color) = colors_groups_MSM_pandemic
+dataset_with_nodes_MSM_pandemic$group_color = as.character(dataset_with_nodes_MSM_pandemic$group_color)
+#######################################################################################################################################
+
+
 ########################################################################################################################################
 ## Reconstruction STN and non-STN groups on full phylogeny
 ########################################################################################################################################
@@ -257,13 +298,15 @@ dataset_with_nodes_reconstructed$group_color_nonpMSM = dataset_with_nodes_recons
 
 idx = match(dataset_with_nodes$name_seq2, dataset_with_nodes_pMSM$name_seq2)
 dataset_with_nodes_reconstructed$index_pMSM[which(!is.na(idx))] = dataset_with_nodes_pMSM$index[idx[which(!is.na(idx))]]
-dataset_with_nodes_reconstructed$groups_pMSM[which(!is.na(idx))] = dataset_with_nodes_pMSM$groups[idx[which(!is.na(idx))]]
-dataset_with_nodes_reconstructed$group_color_pMSM[which(!is.na(idx))] = dataset_with_nodes_pMSM$group_color[idx[which(!is.na(idx))]]
+# dataset_with_nodes_reconstructed$groups_pMSM[which(!is.na(idx))] = dataset_with_nodes_pMSM$groups[idx[which(!is.na(idx))]]
+dataset_with_nodes_reconstructed$groups_pMSM[which(!is.na(idx))] = dataset_with_nodes_reconstructed$groups[which(!is.na(idx))]
+dataset_with_nodes_reconstructed$group_color_pMSM[which(!is.na(idx))] = dataset_with_nodes_reconstructed$group_color[which(!is.na(idx))]
 
 idx = match(dataset_with_nodes$name_seq2, dataset_with_nodes_nonpMSM$name_seq2)
 dataset_with_nodes_reconstructed$index_nonpMSM[which(!is.na(idx))] = dataset_with_nodes_nonpMSM$index[idx[which(!is.na(idx))]]
-dataset_with_nodes_reconstructed$groups_nonpMSM[which(!is.na(idx))] = dataset_with_nodes_nonpMSM$groups[idx[which(!is.na(idx))]]
-dataset_with_nodes_reconstructed$group_color_nonpMSM[which(!is.na(idx))] = dataset_with_nodes_nonpMSM$group_color[idx[which(!is.na(idx))]]
+# dataset_with_nodes_reconstructed$groups_nonpMSM[which(!is.na(idx))] = dataset_with_nodes_nonpMSM$groups[idx[which(!is.na(idx))]]
+dataset_with_nodes_reconstructed$groups_nonpMSM[which(!is.na(idx))] = dataset_with_nodes_reconstructed$groups[which(!is.na(idx))]
+dataset_with_nodes_reconstructed$group_color_nonpMSM[which(!is.na(idx))] = dataset_with_nodes_reconstructed$group_color[which(!is.na(idx))]
 
 ## nonpMSM
 snp_data = dataset_with_nodes_reconstructed$groups_nonpMSM[which(dataset_with_nodes_reconstructed$is.node == 'no')]
@@ -289,7 +332,7 @@ dataset_with_nodes_reconstructed$groups_pMSM = rec_all
 #######################################################################################################################################
 ## Save the detection
 #######################################################################################################################################
-save.image('2_analysis_index/2_find_index_groups/Lineages_detected_20251218.Rdata')
+save.image('2_analysis_index/2_find_index_groups/Lineages_detected_20260301.Rdata')
 #######################################################################################################################################
 
 

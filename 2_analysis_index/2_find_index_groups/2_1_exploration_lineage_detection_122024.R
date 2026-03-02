@@ -10,7 +10,7 @@ library(thd)
 library(snow)
 library(doParallel)
 
-load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251218.Rdata')
+load('2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20260301.Rdata')
 
 ########################################################################################################################################
 ## Useful functions
@@ -322,5 +322,33 @@ potential_splits_weighting = find.groups.by.index.dynamics(timed_tree = tree_non
 end_time = Sys.time()
 print(end_time - start_time)
 saveRDS(potential_splits_weighting, paste0('2_analysis_index/2_find_index_groups/potential_splits_weighting_nonpMSM_202510_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
+######################################################################################################################################
+
+######################################################################################################################################
+## Detection lineages - MSM pandemic
+######################################################################################################################################
+start_time = Sys.time()
+potential_splits_weighting = find.groups.by.index.dynamics(timed_tree = tree_MSM_pandemic,
+                                                           metadata = dataset_with_nodes_MSM_pandemic,
+                                                           node_support = NULL,
+                                                           threshold_node_support = 0.5,
+                                                           time_window_initial,
+                                                           time_window_increment,
+                                                           min_descendants_per_tested_node,
+                                                           min_group_size,
+                                                           p_value_smooth,
+                                                           stepwise_deviance_explained_threshold = max_stepwise_deviance_explained_threshold,
+                                                           stepwise_AIC_threshold,
+                                                           weight_by_time,
+                                                           weighting_transformation,
+                                                           k_smooth,
+                                                           plot_screening,
+                                                           parallelize_code,
+                                                           number_cores = number_cores, 
+                                                           max_groups_found = max_groups_found, 
+                                                           keep_track = keep_track, log_y = F)
+end_time = Sys.time()
+print(end_time - start_time)
+saveRDS(potential_splits_weighting, paste0('2_analysis_index/2_find_index_groups/potential_splits_weighting_MSM_pandemic_202603_', k_smooth, '_min_group_size_', min_group_size, '.rds'))
 ######################################################################################################################################
 

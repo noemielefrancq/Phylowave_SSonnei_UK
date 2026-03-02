@@ -224,6 +224,12 @@ names_seqs_pMSM = tree_pMSM$tip.label
 names_seqs_nonpMSM = tree_nonpMSM$tip.label
 names_seqs_travelpMSM = tree_travelpMSM$tip.label
 
+## MSM only tree
+bactres_MSM_pandemic = readRDS('1_Data/MSMssonneigeospatialbacdate011125_new.rds')
+tree_MSM_pandemic = ladderize(bactres_MSM_pandemic$tree, right = F)
+names_seqs_MSM_pandemic = tree_MSM_pandemic$tip.label
+metadata_msm_new_lineage = read.csv('1_Data/msm_data_red040925.csv') ## Contains only sequences up to Feb 2020
+
 ## Mutation rate
 mu = 6.39E-7 ## in mutations/site/year
 
@@ -262,6 +268,12 @@ dataset_tips_travelpMSM = data.frame('ID' = 1:length(names_seqs_travelpMSM),
                                'name_seq' = names_seqs_travelpMSM,
                                'time' = NA)
 dataset_tips_travelpMSM$time = as.numeric(dataset_tips_travelpMSM$time)
+
+## MSM pandemic
+dataset_tips_MSM_pandemic = data.frame('ID' = 1:length(names_seqs_MSM_pandemic),
+                                       'name_seq' = names_seqs_MSM_pandemic,
+                                       'time' = NA)
+dataset_tips_MSM_pandemic$time = as.numeric(dataset_tips_MSM_pandemic$time)
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -343,6 +355,35 @@ dataset_with_nodes_travelpMSM = data.frame('ID' = c(1:length(names_seqs_travelpM
                                      'AzithromycinR' = c(metadata$AzithromycinR[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'Genotype' = c(metadata$Genotype[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))),
                                      'travelpMSMdemdef' = c(metadata$Group[match(names_seqs_travelpMSM, metadata$Accession)], rep(NA, (length(names_seqs_travelpMSM)-1))))
+
+
+
+## MSM pandemic
+## Compute distance between each pair of sequences AND NODES in the tree
+genetic_distance_mat_MSM_pandemic = dist.nodes.with.names(tree_MSM_pandemic)
+
+## Get the time each node
+nroot = length(tree_MSM_pandemic$tip.label)+1 ## Checked and it's the root 
+distance_to_root = genetic_distance_mat_MSM_pandemic[nroot,]
+root_height_MSM_pandemic = tree_MSM_pandemic$root.time
+nodes_height = root_height_MSM_pandemic + distance_to_root[length(names_seqs_MSM_pandemic)+(1:(length(names_seqs_MSM_pandemic)-1))]
+all_nodes_heights_MSM_pandemic = root_height_MSM_pandemic + distance_to_root
+
+# Meta-data with nodes 
+metadata_msm_new_lineage$AzithromycinR[which(is.na(metadata_msm_new_lineage$AzithromycinR))] = 0
+metadata_msm_new_lineage$ESBLR[which(is.na(metadata_msm_new_lineage$ESBLR))] = 0
+
+dataset_with_nodes_MSM_pandemic = data.frame('ID' = c(1:length(names_seqs_MSM_pandemic), length(names_seqs_MSM_pandemic)+(1:(length(names_seqs_MSM_pandemic)-1))),
+                                             'name_seq' = c(names_seqs_MSM_pandemic, length(names_seqs_MSM_pandemic)+(1:(length(names_seqs_MSM_pandemic)-1))),
+                                             'name_seq2' = c(names_seqs_MSM_pandemic, tree_MSM_pandemic$node.label),
+                                             'time' = all_nodes_heights_MSM_pandemic,
+                                             'is.node' = c(rep('no', length(names_seqs_MSM_pandemic)), rep('yes', (length(names_seqs_MSM_pandemic)-1))),
+                                             'AMRany' = c(metadata_msm_new_lineage$AMRany[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
+                                             'ESBLR' = c(metadata_msm_new_lineage$ESBLR[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
+                                             'CiprofloxacinR' = c(metadata_msm_new_lineage$CiprofloxacinR[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
+                                             'AzithromycinR' = c(metadata_msm_new_lineage$AzithromycinR[match(names_seqs_MSM_pandemic, metadata_msm_new_lineage$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
+                                             'Genotype' = c(metadata$Genotype[match(names_seqs_MSM_pandemic, metadata$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))),
+                                             'travelpMSMdemdef' = c(metadata$Group[match(names_seqs_MSM_pandemic, metadata$Accession)], rep(NA, (length(names_seqs_MSM_pandemic)-1))))
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -372,6 +413,10 @@ dataset_with_nodes_pMSM$Genotype = dataset_with_nodes$Genotype[match(dataset_wit
 ## Travel pMSM
 dataset_with_nodes_travelpMSM$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_travelpMSM$name_seq2, 
                                                                      dataset_with_nodes$name_seq2)]
+
+## MSM pandemic
+dataset_with_nodes_MSM_pandemic$Genotype = dataset_with_nodes$Genotype[match(dataset_with_nodes_MSM_pandemic$name_seq2, 
+                                                                             dataset_with_nodes$name_seq2)]
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -459,6 +504,10 @@ dataset_with_nodes_pMSM$Genotype_simplified = dataset_with_nodes$Genotype_simpli
 ## Travel pMSM
 dataset_with_nodes_travelpMSM$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_travelpMSM$name_seq2, 
                                                                                            dataset_with_nodes$name_seq2)]
+
+## MSM pandemic
+dataset_with_nodes_MSM_pandemic$Genotype_simplified = dataset_with_nodes$Genotype_simplified[match(dataset_with_nodes_MSM_pandemic$name_seq2, 
+                                                                                                   dataset_with_nodes$name_seq2)]
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -495,6 +544,16 @@ dataset_with_nodes_travelpMSM$index = compute.index(time_distance_mat = genetic_
                                                    mutation_rate = mu,
                                                    timescale = timescale,
                                                    genome_length = genome_length)
+
+timescale_MSM_pandemic = 0.25
+wind = 0.5
+dataset_with_nodes_MSM_pandemic$index = compute.index(time_distance_mat = genetic_distance_mat_MSM_pandemic, 
+                                                      timed_tree = tree_MSM_pandemic, 
+                                                      time_window = wind,
+                                                      metadata = dataset_with_nodes_MSM_pandemic, 
+                                                      mutation_rate = mu,
+                                                      timescale = timescale_MSM_pandemic,
+                                                      genome_length = genome_length)
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -534,6 +593,13 @@ dataset_with_nodes_travelpMSM$Genotype_color = factor(tmp, levels = clades)
 levels(dataset_with_nodes_travelpMSM$Genotype_color) = colors_clades
 dataset_with_nodes_travelpMSM$Genotype_color = as.character(dataset_with_nodes_travelpMSM$Genotype_color)
 dataset_with_nodes_travelpMSM$Genotype_color[which(is.na(dataset_with_nodes_travelpMSM$Genotype_color))] = 'grey'
+
+## MSM pandemic
+tmp = unlist(lapply(dataset_with_nodes_MSM_pandemic$Genotype, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(3,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
+dataset_with_nodes_MSM_pandemic$Genotype_color = factor(tmp, levels = clades)
+levels(dataset_with_nodes_MSM_pandemic$Genotype_color) = colors_clades
+dataset_with_nodes_MSM_pandemic$Genotype_color = as.character(dataset_with_nodes_MSM_pandemic$Genotype_color)
+dataset_with_nodes_MSM_pandemic$Genotype_color[which(is.na(dataset_with_nodes_MSM_pandemic$Genotype_color))] = 'grey'
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -573,11 +639,18 @@ dataset_with_nodes_travelpMSM$Genotype_simplified_color = factor(tmp, levels = c
 levels(dataset_with_nodes_travelpMSM$Genotype_simplified_color) = colors_clades_simplified
 dataset_with_nodes_travelpMSM$Genotype_simplified_color = as.character(dataset_with_nodes_travelpMSM$Genotype_simplified_color)
 dataset_with_nodes_travelpMSM$Genotype_simplified_color[which(is.na(dataset_with_nodes_travelpMSM$Genotype_simplified_color))] = 'grey'
+
+## MSM pandemic
+tmp = unlist(lapply(dataset_with_nodes_MSM_pandemic$Genotype_simplified, function(x)paste0(str_split(x, '\\.')[[1]][1:min(c(10,length(str_split(x, '\\.')[[1]])))], collapse = '.')))
+dataset_with_nodes_MSM_pandemic$Genotype_simplified_color = factor(tmp, levels = clades_simplified)
+levels(dataset_with_nodes_MSM_pandemic$Genotype_simplified_color) = colors_clades_simplified
+dataset_with_nodes_MSM_pandemic$Genotype_simplified_color = as.character(dataset_with_nodes_MSM_pandemic$Genotype_simplified_color)
+dataset_with_nodes_MSM_pandemic$Genotype_simplified_color[which(is.na(dataset_with_nodes_MSM_pandemic$Genotype_simplified_color))] = 'grey'
 ########################################################################################################################################
 
 ########################################################################################################################################
 ## Save results
 ########################################################################################################################################
-save.image(file='2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20251218.Rdata')
+save.image(file='2_analysis_index/1_index_computations/Initial_index_computation_and_parameters_20260301.Rdata')
 ########################################################################################################################################
 

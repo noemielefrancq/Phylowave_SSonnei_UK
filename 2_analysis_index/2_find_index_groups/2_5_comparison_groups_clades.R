@@ -698,13 +698,183 @@ write.csv(correspondance_groups_N, file = '2_analysis_index/2_find_index_groups/
 #######################################################################################################################################
 ## ARI genotype simplified
 #######################################################################################################################################
-library(fossil)
-idx = which(!is.na(dataset_with_nodes$Genotype))
-group1 = as.numeric(dataset_with_nodes$Genotype[idx])
+library(fossil) 
+dataset_with_nodes$Genotype_simplified[which(dataset_with_nodes$Genotype_simplified == 'NA' | dataset_with_nodes$Genotype_simplified == 'ZOthers')] = NA
+idx = which(!is.na(dataset_with_nodes$Genotype_simplified))
+group1 = as.numeric(as.factor(dataset_with_nodes$Genotype_simplified[idx]))
 group2 = as.numeric(dataset_with_nodes$groups[idx])
 rand.treeannotator_partitions = fossil::adj.rand.index(group1, group2)
 rand.treeannotator_partitions
-# 0.7027017
+# 0.7833
+
+m = table(group2, group1)
+ari = CrossClustering::ari(m, digits = 4)
+ari$ari
+# CI: 0.7823 0.7843 
+#######################################################################################################################################
+
+
+
+
+
+
+#######################################################################################################################################
+## Pandemic lineage - Compute groups vs ESBLR
+#######################################################################################################################################
+dataset_with_nodes_MSM_pandemic$ESBLR = as.character(dataset_with_nodes_MSM_pandemic$ESBLR)
+dataset_with_nodes_MSM_pandemic$ESBLR = factor(dataset_with_nodes_MSM_pandemic$ESBLR)
+
+grouping1 = levels(as.factor(dataset_with_nodes_MSM_pandemic$ESBLR))
+grouping2 = levels(as.factor(dataset_with_nodes_MSM_pandemic$groups))
+correspondance_groups = matrix(0, ncol = length(grouping1), nrow = length(grouping2))
+colnames(correspondance_groups) = grouping1
+rownames(correspondance_groups) = grouping2
+correspondance_groups_N = matrix(0, ncol = length(grouping1), nrow = length(grouping2))
+colnames(correspondance_groups_N) = grouping1
+rownames(correspondance_groups_N) = grouping2
+for(i in 1:length(grouping1)){
+  idx = which(dataset_with_nodes_MSM_pandemic$ESBLR == grouping1[i])
+  t = table(as.numeric(as.character(dataset_with_nodes_MSM_pandemic$groups[idx])))
+  correspondance_groups_N[match(names(t), grouping2), i] = t
+  t = t/sum(t)
+  correspondance_groups[match(names(t), grouping2), i] = t
+}
+tmp = rowSums(correspondance_groups_N)
+correspondance_groups_N[,1] = correspondance_groups_N[,1]/tmp
+correspondance_groups_N[,2] = correspondance_groups_N[,2]/tmp
+orders = slanter::slanted_orders(
+  data = correspondance_groups,
+  order_rows = F,
+  order_cols = F,  #TRUE,
+  squared_order = TRUE,
+  same_order = FALSE,
+  discount_outliers = F,
+  max_spin_count = 100
+)
+correspondance_groups_auto = correspondance_groups[orders$rows,rev(orders$cols)]
+correspondance_groups_N = correspondance_groups_N[orders$rows,rev(orders$cols)]
+coul <- colorRampPalette(RColorBrewer::brewer.pal(name = 'Reds', n = 9))(25)
+
+correspondance_groups_N_EBSL = correspondance_groups_N
+#######################################################################################################################################
+
+#######################################################################################################################################
+## Pandemic lineage - Compute groups vs CiprofloxacinR
+#######################################################################################################################################
+dataset_with_nodes_MSM_pandemic$CiprofloxacinR = as.character(dataset_with_nodes_MSM_pandemic$CiprofloxacinR)
+dataset_with_nodes_MSM_pandemic$CiprofloxacinR = factor(dataset_with_nodes_MSM_pandemic$CiprofloxacinR)
+
+grouping1 = c("0", "1")
+grouping2 = levels(as.factor(dataset_with_nodes_MSM_pandemic$groups))
+correspondance_groups = matrix(0, ncol = length(grouping1), nrow = length(grouping2))
+colnames(correspondance_groups) = grouping1
+rownames(correspondance_groups) = grouping2
+correspondance_groups_N = matrix(0, ncol = length(grouping1), nrow = length(grouping2))
+colnames(correspondance_groups_N) = grouping1
+rownames(correspondance_groups_N) = grouping2
+for(i in 1:length(grouping1)){
+  idx = which(dataset_with_nodes_MSM_pandemic$CiprofloxacinR == grouping1[i])
+  t = table(as.numeric(as.character(dataset_with_nodes_MSM_pandemic$groups[idx])))
+  correspondance_groups_N[match(names(t), grouping2), i] = t
+  t = t/sum(t)
+  correspondance_groups[match(names(t), grouping2), i] = t
+}
+tmp = rowSums(correspondance_groups_N)
+correspondance_groups_N[,1] = correspondance_groups_N[,1]/tmp
+correspondance_groups_N[,2] = correspondance_groups_N[,2]/tmp
+orders = slanter::slanted_orders(
+  data = correspondance_groups,
+  order_rows = F,
+  order_cols = F,
+  squared_order = TRUE,
+  same_order = FALSE,
+  discount_outliers = F,
+  max_spin_count = 100
+)
+correspondance_groups_auto = correspondance_groups[orders$rows,rev(orders$cols)]
+correspondance_groups_N = correspondance_groups_N[orders$rows,rev(orders$cols)]
+coul <- colorRampPalette(RColorBrewer::brewer.pal(name = 'Reds', n = 9))(25)
+auto_groups = function(){
+  heatmap(correspondance_groups_auto, Colv = NA, Rowv = NA, scale="none", col = c('white' , colorRampPalette(RColorBrewer::brewer.pal(name = 'Reds', n = 9))(25)))
+}
+
+correspondance_groups_N_CIPRO = correspondance_groups_N
+#######################################################################################################################################
+
+#######################################################################################################################################
+## Pandemic lineage - Compute groups vs Az
+#######################################################################################################################################
+dataset_with_nodes_MSM_pandemic$AzithromycinR = as.character(dataset_with_nodes_MSM_pandemic$AzithromycinR)
+dataset_with_nodes_MSM_pandemic$AzithromycinR = factor(dataset_with_nodes_MSM_pandemic$AzithromycinR)
+
+grouping1 = levels(as.factor(dataset_with_nodes_MSM_pandemic$AzithromycinR))
+grouping2 = levels(as.factor(dataset_with_nodes_MSM_pandemic$groups))
+correspondance_groups = matrix(0, ncol = length(grouping1), nrow = length(grouping2))
+colnames(correspondance_groups) = grouping1
+rownames(correspondance_groups) = grouping2
+correspondance_groups_N = matrix(0, ncol = length(grouping1), nrow = length(grouping2))
+colnames(correspondance_groups_N) = grouping1
+rownames(correspondance_groups_N) = grouping2
+for(i in 1:length(grouping1)){
+  idx = which(dataset_with_nodes_MSM_pandemic$AzithromycinR == grouping1[i])
+  t = table(as.numeric(as.character(dataset_with_nodes_MSM_pandemic$groups[idx])))
+  correspondance_groups_N[match(names(t), grouping2), i] = t
+  # t = t/sum(t)
+  correspondance_groups[match(names(t), grouping2), i] = t
+}
+tmp = rowSums(correspondance_groups_N)
+correspondance_groups_N[,1] = correspondance_groups_N[,1]/tmp
+correspondance_groups_N[,2] = correspondance_groups_N[,2]/tmp
+orders = slanter::slanted_orders(
+  data = correspondance_groups,
+  order_rows = F,
+  order_cols = F,
+  squared_order = TRUE,
+  same_order = FALSE,
+  discount_outliers = F,
+  max_spin_count = 100
+)
+correspondance_groups_auto = correspondance_groups[orders$rows,rev(orders$cols)]
+correspondance_groups_N = correspondance_groups_N[orders$rows,rev(orders$cols)]
+coul <- colorRampPalette(RColorBrewer::brewer.pal(name = 'Reds', n = 9))(25)
+auto_groups = function(){
+  heatmap(correspondance_groups_auto, Colv = NA, Rowv = NA, scale="none", col = c('white' , colorRampPalette(RColorBrewer::brewer.pal(name = 'Reds', n = 9))(25)))
+}
+
+correspondance_groups_N_Az = correspondance_groups_N
+#######################################################################################################################################
+
+#######################################################################################################################################
+## Pandemic lineage - Combine all AMR one Matrix and plot
+#######################################################################################################################################
+correspondance_groups_N_AMR = cbind(correspondance_groups_N_Az[,1], correspondance_groups_N_CIPRO[,1])
+correspondance_groups_N_AMR = cbind(correspondance_groups_N_AMR, correspondance_groups_N_EBSL[,1])
+
+correspondance_groups_N_AMR = correspondance_groups_N_AMR[nrow(correspondance_groups_N_AMR):1,]
+plot_AMR_comparison_numbers_pandemic_lineage = Heatmap((correspondance_groups_N_AMR),  col = colorRamp2(c(0, 0.25, 0.5, 0.75, 1), c('white', RColorBrewer::brewer.pal(name = 'Reds', n = 9)[c(2,3,6,9)])),
+                                       heatmap_legend_param = list(at = c(0, 0.5, 1), 
+                                                                   title_gp = gpar(fontsize = 3),
+                                                                   labels_gp = gpar(fontsize = 2),
+                                                                   legend_height = unit(0.25, "cm"),
+                                                                   legend_width = unit(0.025, "cm")), 
+                                       show_row_dend = F, show_column_dend = F, 
+                                       cluster_rows = F, cluster_columns = F,
+                                       show_heatmap_legend = T, name = 'Proportion', column_names_rot = 0, 
+                                       column_names_gp = grid::gpar(fontsize = 3),
+                                       row_names_gp = grid::gpar(fontsize = 3),
+                                       cell_fun = function(j, i, x, y, w, h, col) { # add text to each grid
+                                         if(!is.na(correspondance_groups_N_AMR[i, j])){
+                                           grid.text(round(correspondance_groups_N_AMR[i, j], digits = 2), x, y, gp = gpar(fontsize = 4))
+                                         }
+                                       })
+pdf('2_analysis_index/2_find_index_groups/Heatmap_SSonnei_AMR_Pandemic_lineage_20260301_with_numbers.pdf', width = 3/2.54, height = 2.8/2.54)
+par(oma = c(2,2,2,2), mar = c(0,0,0,0), mgp = c(2,0.5,0), mfrow = c(4,4),
+    cex.axis = 0.01, cex.lab = 0.01, cex.main = 0.05)
+plot_AMR_comparison_numbers_pandemic_lineage
+dev.off()
+
+colnames(correspondance_groups_N_AMR) = c('Az', 'CIPRO', 'ESBL')
+write.csv(correspondance_groups_N_AMR, '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_AMR_Pandemic_lineage_20260301_with_numbers_data.csv')
 #######################################################################################################################################
 
 
