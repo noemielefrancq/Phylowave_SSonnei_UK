@@ -199,7 +199,7 @@ read.chains.from.table = function(table){
 ## Load data
 ########################################################################################################################################
 setwd('~/Dropbox/Projects/2025_Phylowave_SSonnei/Phylowave_SSonnei/')
-load('2_analysis_index/2_find_index_groups/Lineages_detected_20251218.Rdata')
+load('2_analysis_index/2_find_index_groups/Lineages_detected_20260301.Rdata')
 ########################################################################################################################################
 
 ########################################################################################################################################
@@ -569,6 +569,7 @@ coul <- colorRampPalette(RColorBrewer::brewer.pal(name = 'Reds', n = 9))(25)
 auto_groups = function(){
   heatmap(correspondance_groups_auto, Colv = NA, Rowv = NA, scale="none", col = c('white' , colorRampPalette(RColorBrewer::brewer.pal(name = 'Reds', n = 9))(25)))
 }
+correspondance_groups_N_MSM = correspondance_groups_N
 
 write.csv(correspondance_groups_N, file = '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_pMSM_20251218_row_with_numbers_data.csv')
 
@@ -641,6 +642,25 @@ par(oma = c(2,2,2,2), mar = c(0,0,0,0), mgp = c(2,0.5,0), mfrow = c(4,4),
     cex.axis = 0.01, cex.lab = 0.01, cex.main = 0.05)
 plot_pMSM_comparison_numbers
 dev.off()
+#######################################################################################################################################
+
+
+#######################################################################################################################################
+## Write csvs with number and frequencies for heatmaps
+#######################################################################################################################################
+correspondance_groups_prop_AMR = correspondance_groups_N_AMR
+correspondance_groups_N_AMR_yes = apply(correspondance_groups_prop_AMR, MARGIN = 2, function(x)x*(correspondance_groups_N[,1]))
+correspondance_groups_N_AMR_no = apply(correspondance_groups_prop_AMR, MARGIN = 2, function(x)(1-x)*(correspondance_groups_N[,1]))
+
+correspondance_groups_prop_MSM = correspondance_groups_N_MSM
+correspondance_groups_N_MSM = apply(correspondance_groups_prop_MSM, MARGIN = 2, function(x)x*rev(correspondance_groups_N[,1]))
+
+write.csv(correspondance_groups_N, file = '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_pMSM_20251218_N_seq_per_group.csv')
+write.csv(correspondance_groups_N_MSM, file = '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_pMSM_20251218_N_seq_per_group_MSM.csv')
+write.csv(correspondance_groups_N_AMR_yes, file = '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_pMSM_20251218_N_seq_per_group_AMR_yes.csv')
+write.csv(correspondance_groups_N_AMR_no, file = '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_pMSM_20251218_N_seq_per_group_AMR_no.csv')
+write.csv(correspondance_groups_prop_MSM, file = '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_pMSM_20251218_prop_per_group_MSM.csv')
+write.csv(correspondance_groups_prop_AMR, file = '2_analysis_index/2_find_index_groups/Heatmap_SSonnei_pMSM_20251218_prop_per_group_AMR.csv')
 #######################################################################################################################################
 
 #######################################################################################################################################
